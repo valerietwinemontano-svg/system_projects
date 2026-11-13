@@ -1,0 +1,118 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #000000;
+  color: #f2f2f2;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  margin: 0;
+  padding: 40px 20px;
+}
+
+.container {
+  background-color: #111111;
+  border: 1px solid #b30000;
+  border-radius: 10px;
+  padding: 30px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 0 25px rgba(179, 0, 0, 0.4);
+}
+
+h1 {
+  color: #ff1a1a;
+  font-size: 22px;
+  margin-top: 0;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #b30000;
+  padding-bottom: 12px;
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #ff4d4d;
+  font-weight: bold;
+}
+
+textarea,
+input[type="text"] {
+  width: 100%;
+  background-color: #1a1a1a;
+  border: 1px solid #4d0000;
+  border-radius: 5px;
+  color: #f2f2f2;
+  padding: 10px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea:focus,
+input[type="text"]:focus {
+  border-color: #ff1a1a;
+  box-shadow: 0 0 8px rgba(255, 26, 26, 0.6);
+}
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+button {
+  flex: 1;
+  background-color: #b30000;
+  color: #ffffff;
+  border: 1px solid #ff1a1a;
+  border-radius: 5px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+button:hover {
+  background-color: #ff1a1a;
+  box-shadow: 0 0 12px rgba(255, 26, 26, 0.7);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.output-label {
+  margin-top: 5px;
+}
+
+.output-box {
+  background-color: #0d0d0d;
+  border: 1px solid #4d0000;
+  border-radius: 5px;
+  min-height: 100px;
+  padding: 12px;
+  font-size: 14px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  color: #ff6666;
+}
+
+.output-box.success {
+  color: #66ff99;
+  border-color: #1a802b;
+}
+
+.output-box.error {
+  color: #ff4d4d;
+  border-color: #ff1a1a;
+}

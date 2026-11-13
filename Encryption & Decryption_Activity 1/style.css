@@ -1,0 +1,381 @@
+/* ============================================================
+   styles.css  –  all styling
+   ============================================================ */
+
+/* ── Reset & base ── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    margin: 0;
+}
+
+/* ── Card ── */
+.card {
+    max-width: 720px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 20, 40, 0.10), 0 6px 20px rgba(0, 0, 0, 0.04);
+    padding: 2.5rem 2.5rem 2.8rem;
+    transition: all 0.2s ease;
+}
+
+@media (max-width: 500px) {
+    .card {
+        padding: 1.5rem 1.2rem 2rem;
+        border-radius: 18px;
+    }
+}
+
+/* ── Header ── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.2rem;
+    margin-bottom: 1.8rem;
+    border-bottom: 2px solid #eef2f7;
+    padding-bottom: 1.2rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #2c3e7a, #4a6fa5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.header-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1a2639;
+    letter-spacing: -0.01em;
+}
+
+.header-title span {
+    color: #4a6fa5;
+}
+
+.header-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #eef2f7;
+    color: #3a4a6a;
+    padding: 0.3rem 0.9rem;
+    border-radius: 100px;
+    border: 1px solid #dde4ed;
+    white-space: nowrap;
+}
+
+/* ── Key display ── */
+.key-display {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #f7f9fc;
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.2rem;
+    border: 1px solid #e8edf4;
+    flex-wrap: wrap;
+}
+
+.key-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #2c3e7a;
+    letter-spacing: 0.02em;
+}
+
+.key-value {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: #e8edf4;
+    padding: 0.2rem 0.9rem;
+    border-radius: 100px;
+    color: #1a2639;
+    letter-spacing: 0.02em;
+}
+
+.key-status {
+    font-size: 0.72rem;
+    color: #4a6fa5;
+    background: #e3ecf7;
+    padding: 0.15rem 0.7rem;
+    border-radius: 100px;
+    margin-left: auto;
+    font-weight: 500;
+}
+
+/* ── Input / Output ── */
+.field-group {
+    margin-bottom: 1.2rem;
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #2c3e7a;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.01em;
+}
+
+.field-label .hint {
+    font-weight: 400;
+    color: #7a8aa0;
+    font-size: 0.72rem;
+}
+
+textarea {
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1.5px solid #dde4ed;
+    border-radius: 14px;
+    background: #fafcff;
+    color: #1a2639;
+    resize: vertical;
+    min-height: 82px;
+    max-height: 240px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: #4a6fa5;
+    box-shadow: 0 0 0 4px rgba(74, 111, 165, 0.12);
+}
+
+textarea::placeholder {
+    color: #b0bccd;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+}
+
+textarea.input-area {
+    background: #fafcff;
+}
+
+textarea.output-area {
+    background: #f7f9fc;
+    border-color: #dde4ed;
+}
+
+textarea.output-area:focus {
+    border-color: #4a6fa5;
+}
+
+/* ── Output label with sha1 badge ── */
+.output-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #eef2f7;
+    padding: 0.2rem 0.9rem 0.2rem 0.9rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #2c3e7a;
+    border: 1px solid #dde4ed;
+    letter-spacing: 0.02em;
+}
+
+.output-badge .sha1-tag {
+    background: #2c3e7a;
+    color: #fff;
+    padding: 0.1rem 0.6rem;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+/* ── Buttons ── */
+.button-row {
+    display: flex;
+    gap: 0.9rem;
+    margin-top: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 0.75rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    letter-spacing: 0.01em;
+    background: #eef2f7;
+    color: #1a2639;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-encrypt {
+    background: linear-gradient(135deg, #2c3e7a, #3b5a9e);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(44, 62, 122, 0.25);
+}
+.btn-encrypt:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(44, 62, 122, 0.30);
+}
+.btn-encrypt:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+.btn-decrypt {
+    background: linear-gradient(135deg, #0f7b5a, #00a87a);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(15, 123, 90, 0.25);
+}
+.btn-decrypt:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 123, 90, 0.30);
+}
+.btn-decrypt:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+.btn-copy {
+    background: #eef2f7;
+    color: #2c3e7a;
+    flex: 0.4;
+    min-width: 70px;
+    border: 1px solid #dde4ed;
+}
+.btn-copy:hover {
+    background: #e3eaf3;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ── Status ── */
+.status-msg {
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    color: #7a8aa0;
+    min-height: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+}
+.status-msg.error {
+    color: #c0392b;
+}
+.status-msg.success {
+    color: #0f7b5a;
+}
+
+.status-msg .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #dde4ed;
+    border-top-color: #2c3e7a;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Footer ── */
+.footer {
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid #eef2f7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    color: #9aabbe;
+}
+.footer .algo-badge {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+}
+.footer .algo-badge span {
+    background: #f0f4f8;
+    padding: 0.15rem 0.7rem;
+    border-radius: 100px;
+    font-weight: 500;
+    color: #3a4a6a;
+    font-size: 0.65rem;
+    letter-spacing: 0.03em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 500px) {
+    .header-title {
+        font-size: 1.1rem;
+    }
+    .button-row {
+        flex-direction: column;
+    }
+    .btn {
+        min-width: 100%;
+    }
+    .btn-copy {
+        flex: 1;
+    }
+    .key-display {
+        flex-wrap: wrap;
+    }
+    .key-status {
+        margin-left: 0;
+    }
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client-Side Encryption and Decryption</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>Client-Side Encryption and Decryption</h1>
+
+    <label for="textInput">Text:</label>
+    <textarea id="textInput" rows="3" placeholder="Enter text here..."></textarea>
+
+    <label for="keyInput">Encryption Key:</label>
+    <input type="text" id="keyInput" placeholder="Enter encryption key...">
+
+    <div class="button-row">
+      <button id="encryptBtn">Encrypt and Save</button>
+      <button id="decryptBtn">Retrieve and Decrypt</button>
+    </div>
+
+    <label class="output-label">Output:</label>
+    <div id="output" class="output-box"></div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>

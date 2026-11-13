@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoAssurance - Advanced Game Platform (Crimson)</title>
+    <style>
+        /* CSS Variables - Crimson & Obsidian Theme */
+        :root {
+            --bg-base: #0b0a0c;
+            --bg-panel: #1a1113;
+            --bg-panel-light: #2a1a1e;
+            --primary: #b22234;
+            --primary-hover: #d42f3f;
+            --accent: #e63946;
+            --accent-glow: #ff4d5a;
+            --accent-glow-rgba: rgba(230, 57, 70, 0.6);
+            --text-dark: #f0e6e8;
+            --text-light: #ffffff;
+            --text-muted: #bda6aa;
+            --success: #10b981;
+            --danger: #d62828;
+            --border-color: #5a2a2f;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+            --border: 2px solid var(--border-color);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Canvas for floating red lights */
+        #redLightCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .top-nav, .app-container, .modal-overlay {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background: linear-gradient(145deg, #1f1114 0%, #120c0e 100%);
+            color: var(--text-light);
+            padding: 12px 24px;
+            border-radius: var(--border-radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+            border: var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-area { font-size: 20px; display: flex; align-items: center; gap: 10px;}
+        .logo-icon { 
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%); 
+            color: #0b0a0c; 
+            padding: 4px 10px; 
+            border-radius: 8px; 
+            font-weight: 900;
+            box-shadow: 0 0 12px var(--accent-glow-rgba);
+        }
+
+        .nav-controls { display: flex; gap: 15px; align-items: center; }
+        
+        .timer {
+            background-color: #0d0709;
+            color: var(--accent-glow);
+            padding: 8px 18px;
+            border-radius: var(--border-radius-sm);
+            font-weight: 900;
+            font-size: 16px;
+            min-width: 120px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
+            font-family: monospace;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #7a1a24 100%);
+            color: var(--text-light);
+            border: 1px solid var(--accent);
+            padding: 10px 18px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn:hover:not(:disabled) { 
+            background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 0 22px var(--accent-glow-rgba), 0 4px 12px rgba(0,0,0,0.6);
+            border-color: var(--accent-glow);
+        }
+
+        .btn-accent { 
+            background: linear-gradient(135deg, var(--accent) 0%, #9e1e2b 100%); 
+            color: #0b0a0c;
+            border-color: var(--accent-glow);
+            font-weight: 800;
+        }
+
+        .btn-accent:hover:not(:disabled) { 
+            background: linear-gradient(135deg, var(--accent-glow) 0%, var(--accent) 100%); 
+            box-shadow: 0 0 28px var(--accent-glow-rgba);
+            color: #000;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+            color: #0b0a0c;
+            border-color: var(--accent);
+        }
+        
+        .btn-submit:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--accent-glow) 0%, var(--accent) 100%); 
+            box-shadow: 0 0 20px var(--accent-glow-rgba);
+        }
+
+        .btn:disabled { 
+            opacity: 0.4; 
+            cursor: not-allowed; 
+            border-color: transparent;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-panel);
+            border-radius: var(--border-radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-glow);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .team-input-group { display: flex; gap: 8px; }
+        
+        .team-input-group input {
+            flex: 1;
+            padding: 10px 14px;
+            background-color: #120c0e;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            color: var(--text-light);
+            font-weight: bold;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .team-input-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow-rgba);
+        }
+
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 4px;
+        }
+
+        .team-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-panel-light);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .team-item.active {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #2a1a1e 0%, #1e1216 100%);
+            box-shadow: 0 0 18px rgba(230, 57, 70, 0.3);
+        }
+
+        .team-info { display: flex; flex-direction: column; gap: 2px; }
+        .team-name { font-weight: 800; font-size: 14px; color: var(--text-light); }
+        .team-score { font-size: 12px; font-weight: bold; color: var(--accent-glow); }
+        .team-actions { display: flex; gap: 6px; }
+        .btn-small { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+        .sidebar-footer { display: flex; flex-direction: column; gap: 10px; margin-top: 10px;}
+        .sidebar-info { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.4; }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .module-header {
+            background-color: var(--bg-panel);
+            border-radius: var(--border-radius-md);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .module-title h2 { color: var(--accent-glow); font-size: 18px; }
+        .module-title p { font-size: 13px; color: var(--text-muted); margin-top: 4px;}
+
+        .header-actions { display: flex; gap: 12px; align-items: center;}
+        
+        .module-select {
+            padding: 10px 14px;
+            background: #120c0e;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .module-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow-rgba);
+        }
+
+        /* Views */
+        .view-container {
+            display: none;
+            flex: 1;
+            gap: 16px;
+            overflow: hidden;
+            background-color: var(--bg-panel);
+            border-radius: var(--border-radius-lg);
+            border: var(--border);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            flex-direction: column;
+        }
+        .view-container.active { display: flex; }
+
+        .module-inner-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--accent-glow);
+        }
+        
+        .module-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* --- MODULE: QUIZ --- */
+        .quiz-container { flex: 1; display: flex; flex-direction: column; }
+        
+        /* Difficulty Selection Screen */
+        .difficulty-selector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 20px;
+        }
+        .difficulty-selector h2 { font-size: 28px; color: var(--accent-glow); margin-bottom: 10px; text-shadow: 0 0 10px var(--accent-glow-rgba); }
+        .difficulty-buttons { display: flex; gap: 20px; }
+        .difficulty-btn {
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: 900;
+            border-radius: var(--border-radius-md);
+            border: 2px solid var(--border-color);
+            background: var(--bg-panel-light);
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .difficulty-btn:hover { transform: translateY(-5px) scale(1.05); }
+        
+        .difficulty-btn.easy:hover { border-color: #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.5); color: #10b981;}
+        .difficulty-btn.medium:hover { border-color: #f59e0b; box-shadow: 0 0 25px rgba(245, 158, 11, 0.5); color: #f59e0b;}
+        .difficulty-btn.hard:hover { border-color: #ef4444; box-shadow: 0 0 25px rgba(239, 68, 68, 0.5); color: #ef4444;}
+
+        /* Question Screen */
+        .quiz-active-screen { display: none; flex-direction: column; flex: 1; }
+        .quiz-active-screen.active { display: flex; }
+
+        .question-text { font-size: 22px; font-weight: bold; margin-bottom: 24px; line-height: 1.4; color: var(--text-light); }
+        .choices { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        .choice {
+            background: var(--bg-panel-light);
+            border: 1px solid var(--border-color);
+            padding: 16px 20px;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+        .choice:hover { border-color: var(--accent); background: rgba(230, 57, 70, 0.1); }
+        .choice.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success); box-shadow: 0 0 15px rgba(16,185,129,0.3); }
+        .choice.incorrect { background: rgba(214, 40, 40, 0.2); border-color: var(--danger); box-shadow: 0 0 15px rgba(214,40,40,0.3); }
+        
+        .quiz-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 16px;}
+        .timer-display { font-size: 16px; font-weight: bold; color: var(--accent-glow); }
+
+        /* --- MODULE: RISK MATRIX --- */
+        .matrix-layout { display: flex; gap: 20px; height: 100%; overflow: hidden; }
+        .risks-sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .risk-card {
+            background: var(--bg-panel-light);
+            padding: 16px;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+            cursor: grab;
+            transition: all 0.2s;
+        }
+        .risk-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(230,57,70,0.2); }
+        .risk-card.dragging { opacity: 0.5; border-style: dashed; }
+        .risk-card h4 { color: var(--accent-glow); margin-bottom: 6px; font-size: 15px; }
+        .risk-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+        .risk-card select {
+            width: 100%;
+            padding: 8px;
+            background: #120c0e;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            outline: none;
+            font-weight: bold;
+        }
+        .risk-card select:focus { border-color: var(--accent); }
+        
+        .matrix-board { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .matrix-header-row { display: flex; margin-left: 40px; gap: 10px; }
+        .matrix-header-row div { flex: 1; text-align: center; font-weight: bold; font-size: 13px; color: var(--accent-glow); }
+        .matrix-body-row { display: flex; flex: 1; gap: 10px; overflow: hidden; }
+        .row-label { width: 40px; writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); text-align: center; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent-glow); font-size: 14px;}
+        
+        .drop-zone {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s;
+            overflow-y: auto;
+        }
+        .drop-zone.drag-over { border-color: var(--accent-glow); background: rgba(230,57,70,0.1); box-shadow: inset 0 0 15px var(--accent-glow-rgba); }
+        .drop-zone .zone-label { font-size: 12px; color: var(--text-muted); text-align: center; margin: auto; }
+        
+        .placed-risk {
+            background: var(--bg-panel-light);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            border-left: 3px solid var(--accent);
+            color: var(--text-light);
+            font-weight: bold;
+        }
+        .placed-risk.correct { border-left-color: var(--success); background: rgba(16,185,129,0.1); }
+        .placed-risk.incorrect { border-left-color: var(--danger); background: rgba(214,40,40,0.1); }
+
+        /* --- MODULE: INCIDENT RESPONSE --- */
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+        .form-group input, .form-group textarea {
+            background: #120c0e;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            color: var(--text-light);
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow-rgba); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .flex-row { display: flex; gap: 16px; }
+        .flex-row > * { flex: 1; }
+
+        /* --- MODULE: SCENARIO --- */
+        .scenario-box {
+            background: var(--bg-panel-light);
+            padding: 24px;
+            border-radius: var(--border-radius-md);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .scenario-text { font-size: 16px; line-height: 1.6; margin-bottom: 16px; color: var(--text-light); }
+
+        /* --- MODULE: ADMIN --- */
+        .admin-grid { display: flex; flex-direction: column; gap: 12px; max-width: 700px; }
+        .admin-grid .flex-row { display: flex; gap: 16px; }
+        .admin-grid .form-group { flex: 1; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(8, 6, 8, 0.9); display: none; justify-content: center; align-items: center;
+            z-index: 100; backdrop-filter: blur(6px);
+        }
+        .modal-content {
+            background: var(--bg-panel); padding: 30px; border-radius: var(--border-radius-lg);
+            width: 480px; border: var(--border); box-shadow: 0 10px 36px rgba(0,0,0,0.8);
+        }
+        .modal-content h2 { margin-bottom: 20px; color: var(--accent-glow); text-align: center; }
+        .score-row { 
+            display: flex; justify-content: space-between; padding: 12px 18px; 
+            background: var(--bg-panel-light); border-radius: var(--border-radius-sm); 
+            margin-bottom: 8px; border: 1px solid var(--border-color); color: var(--text-light); font-weight: bold;
+        }
+        .score-row:first-child { border-color: var(--accent); color: var(--accent-glow); font-size: 16px; box-shadow: 0 0 12px rgba(230,57,70,0.2); }
+        
+        .alert-box {
+            text-align: center; font-size: 15px; color: var(--text-light); 
+            margin-bottom: 20px; line-height: 1.5;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0d0709; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-hover); }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Red Lights Canvas -->
+    <canvas id="redLightCanvas"></canvas>
+
+    <!-- Top Navigation -->
+    <header class="top-nav">
+        <div class="logo-area">
+            <div class="logo-icon">ACT</div>
+            InfoAssurance
+        </div>
+        <div class="nav-controls">
+            <div class="timer" id="gameTimer">00:00</div>
+            <button class="btn btn-accent" onclick="toggleScoreboard()">Show Scoreboard</button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="section-title">Teams & Controls</div>
+            
+            <div class="team-input-group">
+                <input type="text" id="newTeamName" placeholder="Team name" onkeypress="handleEnter(event)">
+                <button class="btn btn-accent" onclick="addTeam()">Add</button>
+            </div>
+
+            <div class="team-list" id="teamList"></div>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-accent" id="btnStartGame" onclick="startGame()">Start Game</button>
+                <button class="btn" onclick="resetAll()">Reset All</button>
+                <button class="btn" onclick="exportScores()">Export Scores</button>
+                
+                <div class="sidebar-info">
+                    <strong>Active Team:</strong> <span id="activeTeamDisplay">None</span><br>
+                    Stored locally. Use Export to save scores as JSON.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <div class="module-header">
+                <div class="module-title">
+                    <h2>Module: <span id="currentModuleName">Quiz</span></h2>
+                    <p>Choose a module and run hands-on exercises.</p>
+                </div>
+                <div class="header-actions">
+                    <select class="module-select" id="moduleSelect" onchange="switchModule(this.value)">
+                        <option value="quiz">Quiz</option>
+                        <option value="risk">Risk Matrix</option>
+                        <option value="incident">Incident Response</option>
+                        <option value="scenario">Scenario Simulator</option>
+                        <option value="admin">Admin/Editor</option>
+                    </select>
+                    <button class="btn btn-accent" onclick="nextAction()">Next</button>
+                </div>
+            </div>
+
+            <!-- VIEW: QUIZ -->
+            <div class="view-container active" id="view-quiz">
+                <div class="quiz-container">
+                    
+                    <!-- Difficulty Selector -->
+                    <div class="difficulty-selector" id="difficultySelector">
+                        <h2>Select Difficulty</h2>
+                        <div class="difficulty-buttons">
+                            <button class="difficulty-btn easy" onclick="startQuizWithDifficulty('easy')">Easy</button>
+                            <button class="difficulty-btn medium" onclick="startQuizWithDifficulty('medium')">Medium</button>
+                            <button class="difficulty-btn hard" onclick="startQuizWithDifficulty('hard')">Hard</button>
+                        </div>
+                    </div>
+
+                    <!-- Active Question Screen -->
+                    <div class="quiz-active-screen" id="quizActiveScreen">
+                        <div class="question-text" id="quizQuestion"></div>
+                        <div class="choices" id="quizChoices"></div>
+                        
+                        <div class="quiz-footer">
+                            <span style="color: var(--text-muted);">Difficulty: <span id="quizDifficulty" style="color: var(--accent-glow); font-weight: bold;">---</span></span>
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <span class="timer-display">Timer: <span id="quizTimer">0s</span></span>
+                                <button class="btn btn-accent" onclick="revealAnswer()" id="btnReveal" disabled>Reveal Answer</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- VIEW: RISK MATRIX -->
+            <div class="view-container" id="view-risk">
+                <div class="module-inner-title">Risk Matrix</div>
+                <div class="module-desc">Drag risk cards into the matrix to estimate Impact x Likelihood.</div>
+                
+                <div class="matrix-layout">
+                    <div class="risks-sidebar" id="riskContainer">
+                        <!-- Cards injected via JS -->
+                    </div>
+                    
+                    <div class="matrix-board">
+                        <div class="matrix-header-row">
+                            <div>1 (Rare)</div>
+                            <div>2 (Unlikely)</div>
+                            <div>3 (Possible)</div>
+                            <div>4 (Likely)</div>
+                            <div>5 (Certain)</div>
+                        </div>
+                        <div class="matrix-body-row">
+                            <div class="row-label">Likelihood →</div>
+                            <div class="drop-zone" id="zone1" data-zone="1"><span class="zone-label">Drop Here</span></div>
+                            <div class="drop-zone" id="zone2" data-zone="2"><span class="zone-label">Drop Here</span></div>
+                            <div class="drop-zone" id="zone3" data-zone="3"><span class="zone-label">Drop Here</span></div>
+                            <div class="drop-zone" id="zone4" data-zone="4"><span class="zone-label">Drop Here</span></div>
+                            <div class="drop-zone" id="zone5" data-zone="5"><span class="zone-label">Drop Here</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: INCIDENT RESPONSE -->
+            <div class="view-container" id="view-incident">
+                <div class="module-inner-title">Incident Response Drill</div>
+                <div class="module-desc">Simulate an incident: assign actions to team members, set containment time, and record lessons learned.</div>
+                
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Incident Title</label>
+                        <input type="text" id="incidentTitle" placeholder="e.g., Ransomware on HR Server">
+                    </div>
+                    <div class="form-group">
+                        <label>Containment (min)</label>
+                        <input type="number" id="incidentTime" placeholder="e.g., 45">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Actions taken...</label>
+                    <textarea id="incidentActions" placeholder="Detail the steps taken by the team..."></textarea>
+                </div>
+                
+                <div style="margin-top: auto; display: flex; gap: 10px;">
+                    <button class="btn btn-submit" onclick="submitIncident()">Start Drill</button>
+                    <button class="btn" onclick="endIncident()">End Drill</button>
+                </div>
+            </div>
+
+            <!-- VIEW: SCENARIO SIMULATOR -->
+            <div class="view-container" id="view-scenario">
+                <div class="module-inner-title">Scenario Simulator</div>
+                <div class="module-desc">Teams are presented with realistic incidents and must pick the best set of responses. Judges score up to 20 points.</div>
+                
+                <div class="scenario-box">
+                    <h3 style="margin-bottom: 12px; color: var(--accent-glow);">Scenario will appear here.</h3>
+                    <p class="scenario-text" id="scenarioText">Click "Next" to begin.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Type recommended actions (short bullet list)...</label>
+                    <textarea id="scenarioResponse" placeholder="1. Isolate the network..."></textarea>
+                </div>
+                
+                <div style="margin-top: auto; display: flex; gap: 10px;">
+                    <button class="btn btn-submit" onclick="submitScenario()">Submit Response</button>
+                    <button class="btn" onclick="loadNextScenario()">Next Scenario</button>
+                </div>
+            </div>
+
+            <!-- VIEW: ADMIN/EDITOR -->
+            <div class="view-container" id="view-admin">
+                <div class="module-inner-title">Admin / Question Editor</div>
+                
+                <div class="admin-grid">
+                    <div class="flex-row">
+                        <div class="form-group" style="flex: 0.3;">
+                            <label>Difficulty</label>
+                            <select id="adminDifficulty" style="background: #120c0e; color: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 0.7;">
+                            <label>Question text</label>
+                            <input type="text" id="adminQuestion" placeholder="Enter question here...">
+                        </div>
+                    </div>
+                    
+                    <div class="flex-row">
+                        <div class="form-group">
+                            <label>Choice A</label>
+                            <input type="text" id="adminChoiceA">
+                        </div>
+                        <div class="form-group">
+                            <label>Choice B</label>
+                            <input type="text" id="adminChoiceB">
+                        </div>
+                    </div>
+                    <div class="flex-row">
+                        <div class="form-group">
+                            <label>Choice C</label>
+                            <input type="text" id="adminChoiceC">
+                        </div>
+                        <div class="form-group">
+                            <label>Choice D</label>
+                            <input type="text" id="adminChoiceD">
+                        </div>
+                    </div>
+                    
+                    <div class="flex-row" style="align-items: flex-end;">
+                        <div class="form-group" style="flex: 0.3;">
+                            <label>Correct letter (A-D)</label>
+                            <input type="text" id="adminCorrect" maxlength="1" style="text-transform: uppercase;">
+                        </div>
+                        <button class="btn btn-submit" onclick="addQuestion()">Add Question</button>
+                        <button class="btn" onclick="resetQuestions()">Reset Questions</button>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted);">Questions persist in localStorage. Use Reset to clear.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Scoreboard Modal -->
+    <div class="modal-overlay" id="scoreboardModal">
+        <div class="modal-content">
+            <h2>Current Standings</h2>
+            <div id="modalScoreList"></div>
+            <button class="btn btn-accent" style="width: 100%; margin-top: 20px;" onclick="toggleScoreboard()">Close</button>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div class="modal-overlay" id="messageModal">
+        <div class="modal-content">
+            <h2 id="messageTitle">Notice</h2>
+            <div class="alert-box" id="messageText">Message goes here...</div>
+            <button class="btn btn-accent" style="width: 100%;" onclick="closeMessageModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Floating Red Lights Canvas ---
+        const canvas = document.getElementById('redLightCanvas');
+        const ctx = canvas.getContext('2d');
+        let lights = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class RedLight {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.radius = 2 + Math.random() * 14;
+                this.speedY = -0.3 - Math.random() * 0.9;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = 0.2 + Math.random() * 0.6;
+                this.pulse = Math.random() * Math.PI * 2;
+                this.pulseSpeed = 0.01 + Math.random() * 0.03;
+                const reds = ['#e63946', '#d62828', '#b22234', '#ff4d5a', '#9e1e2b', '#a51e2c'];
+                this.color = reds[Math.floor(Math.random() * reds.length)];
+                this.glow = this.radius * (1.5 + Math.random() * 2);
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.y * 0.008) * 0.3;
+                this.pulse += this.pulseSpeed;
+                if (this.y < -50 || this.x < -50 || this.x > canvas.width + 50) this.reset();
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity * (0.8 + 0.3 * Math.sin(this.pulse));
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = this.glow;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = this.radius * 2.5;
+                ctx.globalAlpha = this.opacity * 0.9;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) lights.push(new RedLight());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            lights.forEach(l => { l.update(); l.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- Global State ---
+        let teams = [
+            { name: 'Alpha', score: 0, active: true },
+            { name: 'Bravo', score: 0, active: false },
+            { name: 'Charlie', score: 0, active: false },
+            { name: 'Delta', score: 0, active: false }
+        ];
+        let gameActive = false;
+        let timeElapsed = 0;
+        let timerInterval = null;
+
+        // --- Initialize App ---
+        function init() {
+            renderTeams();
+            updateUIState();
+            setupDropZones();
+            loadAdminQuestions();
+        }
+
+        function handleEnter(e) { if(e.key === 'Enter') addTeam(); }
+
+        // --- Navigation ---
+        function switchModule(module) {
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${module}`).classList.add('active');
+            
+            const titles = {
+                quiz: 'Quiz', risk: 'Risk Matrix', incident: 'Incident',
+                scenario: 'Scenario', admin: 'Admin'
+            };
+            document.getElementById('currentModuleName').innerText = titles[module];
+            
+            // Reset Quiz view to difficulty selector when switching to quiz
+            if (module === 'quiz') {
+                document.getElementById('difficultySelector').style.display = 'flex';
+                document.getElementById('quizActiveScreen').classList.remove('active');
+                clearInterval(quizTimerInterval);
+            }
+        }
+
+        function nextAction() {
+            const module = document.getElementById('moduleSelect').value;
+            if (module === 'quiz') {
+                // If quiz is active, Next loads a new question of the same difficulty.
+                // If in selection screen, it does nothing (user must pick difficulty).
+                if (document.getElementById('quizActiveScreen').classList.contains('active')) {
+                    loadNextQuestion(currentQuizDifficulty);
+                }
+            }
+            if (module === 'risk') {
+                showMessage("Matrix submitted. Facilitator review recommended. Award points as needed. +10 given by default.", "Success");
+                addPoints(10);
+            }
+            if (module === 'scenario') loadNextScenario();
+        }
+
+        // --- Team Management ---
+        function renderTeams() {
+            const list = document.getElementById('teamList');
+            list.innerHTML = '';
+            teams.forEach((team, index) => {
+                const div = document.createElement('div');
+                div.className = `team-item ${team.active ? 'active' : ''}`;
+                div.innerHTML = `
+                    <div class="team-info">
+                        <span class="team-name">${team.name}</span>
+                        <span class="team-score">Score: ${team.score}</span>
+                    </div>
+                    <div class="team-actions">
+                        <button class="btn btn-small" onclick="setActive(${index})">Select</button>
+                        <button class="btn btn-small btn-accent" onclick="addPoints(10)">+10</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            
+            const active = teams.find(t => t.active);
+            document.getElementById('activeTeamDisplay').innerText = active ? active.name : 'None';
+            renderModalScores();
+        }
+
+        function addTeam() {
+            const input = document.getElementById('newTeamName');
+            if (input.value.trim()) {
+                teams.push({ name: input.value.trim(), score: 0, active: false });
+                input.value = '';
+                renderTeams();
+            }
+        }
+
+        function setActive(index) {
+            teams.forEach(t => t.active = false);
+            teams[index].active = true;
+            renderTeams();
+        }
+
+        function addPoints(pts) {
+            const active = teams.find(t => t.active);
+            if (active) {
+                active.score += pts;
+                renderTeams();
+            } else {
+                showMessage("Please select an active team first.");
+            }
+        }
+
+        function startGame() {
+            if (gameActive) return;
+            gameActive = true;
+            timeElapsed = 0;
+            document.getElementById('btnStartGame').innerText = "Game Running...";
+            document.getElementById('btnStartGame').disabled = true;
+            
+            timerInterval = setInterval(() => {
+                timeElapsed++;
+                const m = Math.floor(timeElapsed / 60).toString().padStart(2, '0');
+                const s = (timeElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('gameTimer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function resetAll() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            clearInterval(quizTimerInterval);
+            document.getElementById('gameTimer').innerText = "00:00";
+            document.getElementById('btnStartGame').innerText = "Start Game";
+            document.getElementById('btnStartGame').disabled = false;
+            teams.forEach(t => t.score = 0);
+            renderTeams();
+            
+            // Reset Quiz
+            document.getElementById('difficultySelector').style.display = 'flex';
+            document.getElementById('quizActiveScreen').classList.remove('active');
+            
+            showMessage("All scores and timers have been reset.", "Reset Complete");
+        }
+
+        function updateUIState() {
+            if (gameActive) {
+                document.getElementById('btnStartGame').disabled = true;
+            }
+        }
+
+        function exportScores() {
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(teams));
+            let downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "InfoAssurance_Scores.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // --- Modals ---
+        function toggleScoreboard() {
+            const modal = document.getElementById('scoreboardModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function renderModalScores() {
+            const list = document.getElementById('modalScoreList');
+            list.innerHTML = '';
+            const sorted = [...teams].sort((a,b) => b.score - a.score);
+            sorted.forEach((t, i) => {
+                const row = document.createElement('div');
+                row.className = 'score-row';
+                row.innerHTML = `<span>${i+1}. ${t.name}</span> <span>${t.score} pts</span>`;
+                list.appendChild(row);
+            });
+        }
+
+        function showMessage(msg, title = "Notice") {
+            document.getElementById('messageTitle').innerText = title;
+            document.getElementById('messageText').innerText = msg;
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+        function closeMessageModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        // --- Module: QUIZ ---
+        // 10 new questions added (total now 20) — covering various info assurance topics.
+        let defaultQuestions = [
+            { q: "Which standard provides a specification for an ISMS?", a: "A. NIST SP 800-53", b: "B. ISO/IEC 27001", c: "C. PCI DSS", d: "D. COBIT", correct: "B", difficulty: "medium" },
+            { q: "What does the 'CIA triad' stand for?", a: "A. Confidentiality, Integrity, Availability", b: "B. Control, Inspection, Authorization", c: "C. Cryptography, Identification, Authentication", d: "D. Compliance, Isolation, Auditing", correct: "A", difficulty: "easy" },
+            { q: "Which of the following is a preventive control?", a: "A. Security audit logs", b: "B. Intrusion detection system", c: "C. Firewall", d: "D. Backup restoration", correct: "C", difficulty: "medium" },
+            { q: "What is the primary purpose of a DMZ in network security?", a: "A. To host public-facing services while protecting the internal network", b: "B. To encrypt all internal traffic", c: "C. To monitor employee internet usage", d: "D. To speed up internal network traffic", correct: "A", difficulty: "medium" },
+            { q: "Which attack involves intercepting and altering communication between two parties?", a: "A. Phishing", b: "B. Man-in-the-Middle (MitM)", c: "C. DDoS", d: "D. SQL Injection", correct: "B", difficulty: "easy" },
+            { q: "What does hashing ensure in information security?", a: "A. Confidentiality", b: "B. Availability", c: "C. Integrity", d: "D. Non-repudiation", correct: "C", difficulty: "medium" },
+            { q: "Which regulation focuses on the protection of personal data of EU citizens?", a: "A. HIPAA", b: "B. SOX", c: "C. GDPR", d: "D. FISMA", correct: "C", difficulty: "easy" },
+            { q: "What is the primary goal of a Business Continuity Plan (BCP)?", a: "A. To prevent all security incidents", b: "B. To ensure critical business functions can continue during a disaster", c: "C. To recover deleted files", d: "D. To train employees on security awareness", correct: "B", difficulty: "medium" },
+            { q: "What type of malware locks a user's files and demands payment?", a: "A. Trojan", b: "B. Spyware", c: "C. Ransomware", d: "D. Adware", correct: "C", difficulty: "easy" },
+            { q: "Which authentication factor is 'something you are'?", a: "A. Password", b: "B. Smart card", c: "C. Fingerprint", d: "D. PIN", correct: "C", difficulty: "easy" },
+            // --- 10 new questions added below ---
+            { q: "What is the primary function of a firewall?", a: "A. To filter network traffic based on rules", b: "B. To encrypt files on the hard drive", c: "C. To scan emails for viruses", d: "D. To manage user passwords", correct: "A", difficulty: "easy" },
+            { q: "Which protocol is used for secure web browsing?", a: "A. HTTP", b: "B. FTP", c: "C. HTTPS", d: "D. Telnet", correct: "C", difficulty: "easy" },
+            { q: "What does the principle of least privilege mean?", a: "A. Give users more access than needed", b: "B. Give users only the access required for their job", c: "C. Share admin accounts among the team", d: "D. Disable all user accounts", correct: "B", difficulty: "medium" },
+            { q: "What is social engineering?", a: "A. Manipulating people to divulge confidential information", b: "B. Engineering social media platforms", c: "C. A type of firewall rule", d: "D. Encrypting social security numbers", correct: "A", difficulty: "medium" },
+            { q: "Which of the following is an example of two-factor authentication?", a: "A. Password and PIN", b: "B. Password and fingerprint scan", c: "C. Username and password", d: "D. Security question and answer", correct: "B", difficulty: "easy" },
+            { q: "What is the purpose of a vulnerability scan?", a: "A. To exploit weaknesses in a system", b: "B. To identify potential security weaknesses", c: "C. To encrypt sensitive data", d: "D. To monitor network traffic", correct: "B", difficulty: "medium" },
+            { q: "Which type of backup stores only the changes made since the last backup?", a: "A. Full backup", b: "B. Incremental backup", c: "C. Differential backup", d: "D. Snapshot", correct: "B", difficulty: "hard" },
+            { q: "What does the term 'phishing' refer to?", a: "A. Sending fraudulent emails to steal credentials", b: "B. Scanning a network for open ports", c: "C. Installing malware via USB", d: "D. Cracking passwords using brute force", correct: "A", difficulty: "easy" },
+            { q: "Which of the following is a symmetric encryption algorithm?", a: "A. RSA", b: "B. ECC", c: "C. AES", d: "D. Diffie-Hellman", correct: "C", difficulty: "hard" },
+            { q: "What is an incident response plan?", a: "A. A document describing how to prevent all attacks", b: "B. A set of procedures to detect, respond to, and recover from incidents", c: "C. A list of employees allowed to access the server room", d: "D. A backup schedule for critical data", correct: "B", difficulty: "medium" }
+        ];
+        
+        let questions = [];
+        let currentQuestion = null;
+        let quizTimerInterval = null;
+        let quizTimeLeft = 0;
+        let answerRevealed = false;
+        let currentQuizDifficulty = 'medium';
+
+        function loadAdminQuestions() {
+            const stored = localStorage.getItem('ia_questions');
+            if (stored) {
+                questions = JSON.parse(stored);
+                if(questions.length !== defaultQuestions.length) {
+                    questions = [...defaultQuestions];
+                    localStorage.setItem('ia_questions', JSON.stringify(questions));
+                }
+            } else {
+                questions = [...defaultQuestions];
+                localStorage.setItem('ia_questions', JSON.stringify(questions));
+            }
+        }
+
+        function startQuizWithDifficulty(difficulty) {
+            if (!gameActive) return showMessage("Please click 'Start Game' first!");
+            
+            currentQuizDifficulty = difficulty;
+            document.getElementById('difficultySelector').style.display = 'none';
+            document.getElementById('quizActiveScreen').classList.add('active');
+            
+            loadNextQuestion(difficulty);
+        }
+
+        function loadNextQuestion(difficulty) {
+            // Filter questions by selected difficulty
+            const filteredQuestions = questions.filter(q => q.difficulty === difficulty);
+            
+            if (filteredQuestions.length === 0) {
+                showMessage(`No questions found for ${difficulty.toUpperCase()} difficulty. Please add some in Admin or reset questions.`, "No Questions");
+                return;
+            }
+
+            clearInterval(quizTimerInterval);
+            answerRevealed = false;
+            document.getElementById('btnReveal').disabled = false;
+
+            currentQuestion = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
+            
+            document.getElementById('quizQuestion').innerText = currentQuestion.q;
+            document.getElementById('quizDifficulty').innerText = currentQuestion.difficulty;
+            
+            const choicesDiv = document.getElementById('quizChoices');
+            choicesDiv.innerHTML = '';
+            
+            ['A', 'B', 'C', 'D'].forEach(letter => {
+                const text = currentQuestion[letter.toLowerCase()];
+                if (text) {
+                    const div = document.createElement('div');
+                    div.className = 'choice';
+                    div.innerText = text;
+                    div.dataset.letter = letter;
+                    div.onclick = () => selectChoice(letter);
+                    choicesDiv.appendChild(div);
+                }
+            });
+
+            quizTimeLeft = 30;
+            document.getElementById('quizTimer').innerText = `${quizTimeLeft}s`;
+            quizTimerInterval = setInterval(() => {
+                quizTimeLeft--;
+                document.getElementById('quizTimer').innerText = `${quizTimeLeft}s`;
+                if (quizTimeLeft <= 0) {
+                    clearInterval(quizTimerInterval);
+                    revealAnswer();
+                }
+            }, 1000);
+        }
+
+        function selectChoice(letter) {
+            if (answerRevealed) return;
+            // If the chosen answer is wrong, immediately highlight it in red (and keep it that way)
+            // The correct answer will NOT be revealed automatically — only when the Reveal Answer button is clicked.
+            const isCorrect = (letter === currentQuestion.correct);
+            if (!isCorrect) {
+                // Mark the selected choice as incorrect (red)
+                const choices = document.querySelectorAll('.choice');
+                choices.forEach(c => {
+                    if (c.dataset.letter === letter) {
+                        c.classList.add('incorrect');
+                    }
+                });
+                // Do NOT reveal the correct answer here. Disable further clicks? 
+                // To prevent the user from clicking another answer, we can set a flag or disable choices.
+                // We'll set answerRevealed = true to block further selection, but the correct answer remains hidden.
+                answerRevealed = true;
+                document.getElementById('btnReveal').disabled = false; // keep reveal button enabled
+                clearInterval(quizTimerInterval);
+            } else {
+                // If correct, we can highlight it as correct immediately, but we'll let revealAnswer handle points.
+                // To avoid double scoring, we call revealAnswer with the selected letter.
+                revealAnswer(letter);
+            }
+        }
+
+        function revealAnswer(selectedLetter = null) {
+            if (!currentQuestion) return;
+            // If called from timer timeout (selectedLetter = null), we just reveal the correct answer without scoring.
+            // If called from button (selectedLetter = null) we also reveal correct answer.
+            // If called after a correct selection, we reveal and score.
+
+            // Only proceed if answer is not already fully revealed (correct highlighted)
+            // We'll use a flag: answerRevealed may be true from a wrong selection, but the correct answer is still hidden.
+            // We need to track if the correct answer has been shown.
+            const alreadyShownCorrect = [...document.querySelectorAll('.choice.correct')].length > 0;
+            if (alreadyShownCorrect) return;
+
+            clearInterval(quizTimerInterval);
+            document.getElementById('btnReveal').disabled = true;
+
+            const choices = document.querySelectorAll('.choice');
+            choices.forEach(c => {
+                if (c.dataset.letter === currentQuestion.correct) {
+                    c.classList.add('correct');   // green highlight for correct answer
+                } else if (selectedLetter && c.dataset.letter === selectedLetter) {
+                    c.classList.add('incorrect'); // red highlight for selected wrong answer
+                }
+                // Also ensure any previously marked incorrect stays red (already done in selectChoice)
+            });
+
+            // Scoring: only if the user selected the correct answer (selectedLetter matches correct)
+            if (selectedLetter === currentQuestion.correct) {
+                addPoints(10);
+            }
+
+            // Mark as fully revealed (correct answer now visible)
+            answerRevealed = true;
+        }
+
+        // --- Module: RISK MATRIX ---
+        let risks = [
+            { id: "r1", title: "Unpatched servers", desc: "Servers missing critical patches", correct: "4" },
+            { id: "r2", title: "Phishing campaign", desc: "Mass phishing emails target staff", correct: "5" },
+            { id: "r3", title: "USB drop", desc: "Unknown USB sticks found in parking area", correct: "2" },
+            { id: "r4", title: "Weak passwords", desc: "Multiple accounts with weak passwords", correct: "3" }
+        ];
+
+        function renderRisks() {
+            const container = document.getElementById('riskContainer');
+            container.innerHTML = '';
+            
+            risks.forEach(r => {
+                const card = document.createElement('div');
+                card.className = 'risk-card';
+                card.id = r.id;
+                card.draggable = true;
+                card.dataset.correct = r.correct;
+                
+                card.innerHTML = `
+                    <h4>${r.title}</h4>
+                    <p>${r.desc}</p>
+                    <select onchange="moveRiskSelect('${r.id}', this.value)">
+                        <option value="">-- Assign --</option>
+                        <option value="1">1 (Rare)</option>
+                        <option value="2">2 (Unlikely)</option>
+                        <option value="3">3 (Possible)</option>
+                        <option value="4">4 (Likely)</option>
+                        <option value="5">5 (Certain)</option>
+                    </select>
+                `;
+
+                card.addEventListener('dragstart', (e) => {
+                    if (e.target.tagName === 'SELECT') return e.preventDefault();
+                    e.dataTransfer.setData('text/plain', card.id);
+                    card.classList.add('dragging');
+                });
+                card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+                container.appendChild(card);
+            });
+        }
+
+        function setupDropZones() {
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const id = e.dataTransfer.getData('text/plain');
+                    const card = document.getElementById(id);
+                    if (card) placeRisk(card, zone);
+                });
+            });
+        }
+
+        function moveRiskSelect(id, zoneVal) {
+            if (!zoneVal) return;
+            const card = document.getElementById(id);
+            const zone = document.getElementById(`zone${zoneVal}`);
+            if (card && zone) placeRisk(card, zone);
+        }
+
+        function placeRisk(card, zone) {
+            if (!gameActive) return showMessage("Please start the game first.");
+            zone.appendChild(card);
+            const select = card.querySelector('select');
+            if (select) select.value = zone.dataset.zone;
+        }
+
+        // --- Module: INCIDENT RESPONSE ---
+        function submitIncident() {
+            if (!gameActive) return showMessage("Please start the game first.");
+            const title = document.getElementById('incidentTitle').value;
+            const time = document.getElementById('incidentTime').value;
+            if (!title || !time) return showMessage("Please fill in incident title and time.");
+            
+            showMessage(`Incident Drill Started: ${title}. Containment target: ${time} min.`, "Drill Started");
+            addPoints(10);
+        }
+
+        function endIncident() {
+            showMessage("Incident drill ended. Review actions taken.", "Drill Ended");
+        }
+
+        // --- Module: SCENARIO ---
+        let scenarios = [
+            "A ransomware attack has encrypted the hospital's patient records system. The IT team must act quickly to contain the spread and restore services.",
+            "A disgruntled employee is suspected of copying sensitive files to a personal USB drive before resigning.",
+            "A major DDoS attack is targeting the company's public website, causing downtime and loss of revenue."
+        ];
+        let currentScenarioIdx = 0;
+
+        function loadNextScenario() {
+            const text = scenarios[currentScenarioIdx];
+            document.getElementById('scenarioText').innerText = text;
+            document.getElementById('scenarioResponse').value = '';
+            currentScenarioIdx = (currentScenarioIdx + 1) % scenarios.length;
+        }
+
+        function submitScenario() {
+            if (!gameActive) return showMessage("Please start the game first.");
+            const response = document.getElementById('scenarioResponse').value;
+            if (!response.trim()) return showMessage("Please enter a response.");
+            
+            showMessage("Response submitted. Facilitator will review and award up to 20 points.", "Scenario Submitted");
+        }
+
+        // --- Module: ADMIN ---
+        function addQuestion() {
+            const q = document.getElementById('adminQuestion').value;
+            const a = document.getElementById('adminChoiceA').value;
+            const b = document.getElementById('adminChoiceB').value;
+            const c = document.getElementById('adminChoiceC').value;
+            const d = document.getElementById('adminChoiceD').value;
+            const correct = document.getElementById('adminCorrect').value.toUpperCase();
+            const diff = document.getElementById('adminDifficulty').value;
+
+            if (!q || !a || !b || !c || !d || !['A','B','C','D'].includes(correct)) {
+                return showMessage("Please fill all fields and select a correct letter (A-D).");
+            }
+
+            questions.push({ q, a, b, c, d, correct, difficulty: diff });
+            localStorage.setItem('ia_questions', JSON.stringify(questions));
+            
+            ['adminQuestion','adminChoiceA','adminChoiceB','adminChoiceC','adminChoiceD','adminCorrect'].forEach(id => document.getElementById(id).value = '');
+            
+            showMessage("Question added successfully.", "Success");
+        }
+
+        function resetQuestions() {
+            if(confirm("Are you sure you want to reset all questions to default?")) {
+                questions = [...defaultQuestions];
+                localStorage.setItem('ia_questions', JSON.stringify(questions));
+                showMessage("Questions reset to default.");
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            init();
+            renderRisks();
+        };
+    </script>
+</body>
+</html>

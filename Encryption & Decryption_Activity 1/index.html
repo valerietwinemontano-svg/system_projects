@@ -1,0 +1,99 @@
+<!-- ============================================================
+     index.html  –  Structure only
+     ============================================================ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Encryption and Decryption</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <div class="card" role="main" aria-label="Encryption and Decryption tool">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="header-icon" aria-hidden="true">&#128274;</div>
+                <div class="header-title">Encryption &amp; <span>Decryption</span></div>
+            </div>
+            <div class="header-badge">&#9670; Test</div>
+        </div>
+
+        <!-- Key display -->
+        <div class="key-display">
+            <span class="key-label">&#128273; Encryption Key</span>
+            <span class="key-value">SHA256</span>
+            <span class="key-status">&#9679; PBKDF2 + AES-GCM</span>
+        </div>
+
+        <!-- Input -->
+        <div class="field-group">
+            <div class="field-label">
+                <span>Input</span>
+                <span class="hint">text to encrypt or decrypt</span>
+            </div>
+            <textarea
+                id="inputText"
+                class="input-area"
+                rows="3"
+                placeholder="Enter text here…"
+                spellcheck="false"
+            >NOT-REPLICATED-SHA256-HASHING-AND-ENCRYPTING-AND-DECRYPTING</textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-row">
+            <button class="btn btn-encrypt" id="encryptBtn" aria-label="Encrypt">
+                <span aria-hidden="true">&#128274;</span> Encrypt
+            </button>
+            <button class="btn btn-decrypt" id="decryptBtn" aria-label="Decrypt">
+                <span aria-hidden="true">&#128273;</span> Decrypt
+            </button>
+            <button class="btn btn-copy" id="copyBtn" aria-label="Copy output">
+                <span aria-hidden="true">&#128203;</span> Copy
+            </button>
+        </div>
+
+        <!-- Output -->
+        <div class="field-group" style="margin-top: 1.2rem;">
+            <div class="field-label">
+                <span>Output</span>
+                <span class="output-badge">
+                    <span>sha1</span>
+                    <span class="sha1-tag">SHA-1</span>
+                </span>
+            </div>
+            <textarea
+                id="outputText"
+                class="output-area"
+                rows="3"
+                placeholder="Result will appear here…"
+                spellcheck="false"
+                readonly
+            ></textarea>
+        </div>
+
+        <!-- Status -->
+        <div class="status-msg" id="statusMsg">
+            <span>Ready</span>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span>&copy; 2026 &middot; Secure Demo</span>
+            <div class="algo-badge">
+                <span>SHA256</span>
+                <span>AES-GCM</span>
+                <span>PBKDF2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

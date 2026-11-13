@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#060606">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Self Security">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Self Security System — Personal Security Suite</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img id="avatarImg" class="avatar" alt="Profile picture">
+    <div class="logo" id="logoFallback">🛡</div>
+    <div style="min-width:0">
+      <h1 id="brandName">Self Security System</h1>
+      <p class="tagline">Personal Security Suite</p>
+    </div>
+  </div>
+  <div class="top-right">
+    <button class="btn primary hidden" id="installBtn" type="button">Install</button>
+    <div class="score-badge">
+      <span class="score-label">GLOBAL SCORE</span>
+      <span class="score-num" id="headerScore">0</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="dashboard">Dashboard</button>
+  <button class="tab" data-tab="analyzer">Password Analyzer</button>
+  <button class="tab" data-tab="generator">Generator</button>
+  <button class="tab" data-tab="vault">Secure Vault</button>
+  <button class="tab" data-tab="checklist">Checklist</button>
+  <button class="tab" data-tab="settings">Settings</button>
+</nav>
+
+<main>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section id="dashboard" class="panel active">
+    <div class="grid-2">
+      <div class="card ring-card">
+        <h2 class="card-title">Security Score</h2>
+        <div class="ring" id="scoreRing" style="--p:0">
+          <span id="scoreValue">0</span>
+        </div>
+        <p class="muted center small" id="scoreHint">
+          Complete the checklist, test a password and create a vault to raise your score.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Status</h2>
+        <ul class="stat-list">
+          <li><span>Checklist</span><strong id="statChecklist">0 / 0</strong></li>
+          <li><span>Last password score</span><strong id="statPassword">—</strong></li>
+          <li><span>Encrypted vault</span><strong id="statVault">Not created</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Recommended Actions</h2>
+      <ul class="tips" id="tipsList"></ul>
+    </div>
+  </section>
+
+  <!-- ================= ANALYZER ================= -->
+  <section id="analyzer" class="panel">
+    <div class="card">
+      <h2 class="card-title">Password Analyzer</h2>
+      <p class="muted small">Everything happens locally. Nothing is ever sent to a server.</p>
+
+      <div class="field" style="margin-top:14px">
+        <label for="pwInput">Type a password</label>
+        <div class="input-row">
+          <input id="pwInput" type="password" placeholder="Enter password to analyze..."
+                 autocomplete="off" spellcheck="false">
+          <button class="btn ghost" id="pwToggle" type="button">Show</button>
+        </div>
+      </div>
+
+      <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
+      <div class="meter-labels">
+        <span id="pwLabel">—</span>
+        <span id="pwScoreTxt">0 / 100</span>
+      </div>
+
+      <div class="grid-2" style="margin-top:6px">
+        <div>
+          <h3 class="sub">Issues</h3>
+          <ul class="list bad" id="issueList"><li class="muted">No analysis yet.</li></ul>
+        </div>
+        <div>
+          <h3 class="sub">Strengths</h3>
+          <ul class="list good" id="strengthList"><li class="muted">No analysis yet.</li></ul>
+        </div>
+      </div>
+
+      <div class="chips">
+        <div class="chip"><span>Length</span><strong id="chipLen">0</strong></div>
+        <div class="chip"><span>Entropy</span><strong id="chipEntropy">0 bits</strong></div>
+        <div class="chip"><span>Time to crack</span><strong id="chipCrack">—</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GENERATOR ================= -->
+  <section id="generator" class="panel">
+    <div class="card">
+      <h2 class="card-title">Password Generator</h2>
+      <p class="muted small">Uses <code>crypto.getRandomValues()</code> — cryptographically secure randomness.</p>
+
+      <div class="output-row" style="margin-top:14px">
+        <input id="genOut" type="text" readonly value="Click Generate">
+        <button class="btn ghost" id="genCopy" type="button">Copy</button>
+      </div>
+
+      <div class="field">
+        <label>Length: <strong id="genLenLabel">20</strong></label>
+        <input type="range" id="genLen" min="8" max="64" value="20">
+      </div>
+
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="optLower" checked> lowercase (a-z)</label>
+        <label class="check"><input type="checkbox" id="optUpper" checked> uppercase (A-Z)</label>
+        <label class="check"><input type="checkbox" id="optDigits" checked> digits (0-9)</label>
+        <label class="check"><input type="checkbox" id="optSymbols" checked> symbols (!@#$)</label>
+      </div>
+
+      <button class="btn primary" id="genBtn">Generate Strong Password</button>
+    </div>
+  </section>
+
+  <!-- ================= VAULT ================= -->
+  <section id="vault" class="panel">
+
+    <div class="card" id="vaultLockCard">
+      <h2 class="card-title">Secure Vault</h2>
+      <p class="muted" id="vaultHint">Create a master password. It never leaves your browser.</p>
+
+      <div class="field" style="margin-top:14px">
+        <label for="masterPw">Master password</label>
+        <div class="input-row">
+          <input id="masterPw" type="password" placeholder="Master password" autocomplete="new-password">
+          <button class="btn ghost" id="masterToggle" type="button">Show</button>
+        </div>
+      </div>
+
+      <div class="field" id="confirmWrap">
+        <label for="masterPw2">Confirm master password</label>
+        <input id="masterPw2" type="password" placeholder="Repeat master password" autocomplete="new-password">
+      </div>
+
+      <button class="btn primary" id="vaultUnlockBtn">Create Vault</button>
+      <p class="msg" id="vaultMsg"></p>
+    </div>
+
+    <div id="vaultApp" class="hidden">
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Vault Unlocked</h2>
+          <button class="btn ghost" id="vaultLockBtn">Lock</button>
+        </div>
+
+        <div class="field">
+          <label for="noteTitle">Title</label>
+          <input id="noteTitle" placeholder="e.g. Bank account">
+        </div>
+
+        <div class="field">
+          <label for="noteBody">Secret content</label>
+          <textarea id="noteBody" rows="4" placeholder="Paste your secret here..."></textarea>
+        </div>
+
+        <button class="btn primary" id="noteSave">Save Note (encrypted)</button>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Saved Notes</h2>
+        <ul class="note-list" id="noteList"><li class="muted">No notes yet.</li></ul>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ================= CHECKLIST ================= -->
+  <section id="checklist" class="panel">
+    <div class="card">
+      <h2 class="card-title">Security Checklist</h2>
+      <p class="muted small">Tick everything you have done. Saved automatically.</p>
+      <ul class="check-list" id="checkList" style="margin-top:12px"></ul>
+    </div>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <section id="settings" class="panel">
+
+    <div class="card">
+      <h2 class="card-title">Self Security System — Profile</h2>
+      <p class="muted small">
+        Upload a profile photo and choose the name shown in the header.
+        Stored only in this browser — nothing is uploaded anywhere.
+      </p>
+
+      <div class="profile-row">
+        <div class="profile-preview-wrap">
+          <img id="profileBig" class="profile-big hidden" alt="Profile preview">
+          <div id="profileBigFallback" class="profile-big fallback">🛡</div>
+        </div>
+
+        <div class="profile-fields">
+          <div class="field">
+            <label for="profileName">Display name</label>
+            <input id="profileName" type="text" maxlength="40" placeholder="Self Security System">
+          </div>
+
+          <div class="btn-row">
+            <button class="btn primary" id="uploadBtn" type="button">Upload Photo</button>
+            <button class="btn ghost" id="removePhotoBtn" type="button">Remove Photo</button>
+            <input type="file" id="photoInput" accept="image/*" hidden>
+          </div>
+
+          <p class="msg" id="profileMsg"></p>
+        </div>
+      </div>
+
+      <button class="btn primary" id="saveProfileBtn" type="button">Save Profile</button>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Data</h2>
+      <p class="muted small">
+        Profile, checklist, password score and encrypted vault notes are stored in this
+        browser's localStorage. Clearing site data removes them permanently.
+      </p>
+      <div style="margin-top:14px">
+        <button class="btn ghost danger" id="resetAllBtn" type="button">Reset All App Data</button>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
